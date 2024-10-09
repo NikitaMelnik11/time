@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luxury Watches - Эксклюзивные часы</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/ScrollTrigger.min.js"></script>
+    <style>
+        :root {
+            --dark-blue: #050a14;
+            --gold: #d4af37;
+            --light-gold: #f1d78f;
+        }
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--dark-blue);
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+        #bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        header {
+            padding: 20px 0;
+            position: fixed;
+            width: 100%;
+            z-index: 1000;
+            background-color: rgba(5, 10, 20, 0.8);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        header.scrolled {
+            padding: 10px 0;
+            background-color: rgba(5, 10, 20, 0.95);
+        }
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+            display: flex;
+            justify-content: flex-end;
+        }
+        nav ul li {
+            margin-left: 30px;
+        }
+        nav ul li a {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 16px;
+            text-transform: uppercase;
+            transition: color 0.3s;
+            position: relative;
+        }
+        nav ul li a::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background-color: var(--gold);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+        nav ul li a:hover::after {
+            transform: scaleX(1);
+        }
+        nav ul li a:hover {
+            color: var(--gold);
+        }
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-content {
+            max-width: 800px;
+            padding: 40px;
+            background-color: rgba(5, 10, 20, 0.7);
+            border-radius: 20px;
+            box-shadow: 0 0 50px rgba(212, 175, 55, 0.2);
+            transform: translateY(50px);
+            opacity: 0;
+            transition: all 1s ease;
+        }
+        .hero-content.visible {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 4em;
+            margin-bottom: 20px;
+            color: var(--gold);
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+        }
+        .hero p {
+            font-size: 1.4em;
+            margin-bottom: 30px;
+            font-weight: 300;
+        }
+        .btn {
+            display: inline-block;
+            padding: 15px 40px;
+            background-color: var(--gold);
+            color: var(--dark-blue);
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            font-size: 1.1em;
+        }
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: all 0.5s;
+        }
+        .btn:hover::before {
+            left: 100%;
+        }
+        .btn:hover {
+            background-color: var(--light-gold);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+            transform: scale(1.05);
+        }
+        .featured-products {
+            padding: 100px 0;
+            position: relative;
+        }
+        .featured-products h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3em;
+            color: var(--gold);
+            text-align: center;
+            margin-bottom: 50px;
+            position: relative;
+            z-index: 2;
+        }
+        .products {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+        .product {
+            width: 300px;
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 15px;
+            transition: all 0.3s;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            transform: translateY(50px);
+            opacity: 0;
+        }
+        .product.visible {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .product.featured {
+            transform: scale(1.05);
+            box-shadow: 0 15px 30px rgba(212, 175, 55, 0.3);
+            border: 2px solid var(--gold);
+        }
+        .product:hover {
+            transform: translateY(-10px);
+        }
+        .product.featured:hover {
+            transform: translateY(-10px) scale(1.05);
+        }
+        .product img {
+            width: 100%;
+            height: auto;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+        .product:hover img {
+            transform: scale(1.05);
+        }
+        .product h3 {
+            font-size: 1.4em;
+            margin-bottom: 10px;
+        }
+        .product p {
+            font-size: 1.2em;
+            color: var(--gold);
+            margin-bottom: 20px;
+        }
+        .about-section {
+            padding: 100px 0;
+            background-color: rgba(5, 10, 20, 0.7);
+            position: relative;
+            z-index: 2;
+        }
+        .about-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .about-text {
+            width: 50%;
+            padding-right: 50px;
+            opacity: 0;
+            transform: translateX(-50px);
+            transition: all 1s ease;
+        }
+        .about-text.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .about-text h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3em;
+            color: var(--gold);
+            margin-bottom: 30px;
+        }
+        .about-text p {
+            font-size: 1.2em;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .about-image {
+            width: 50%;
+            position: relative;
+            opacity: 0;
+            transform: translateX(50px);
+            transition: all 1s ease;
+        }
+        .about-image.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .about-image img {
+            width: 100%;
+            height: auto;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.3);
+        }
+        footer {
+            background-color: rgba(5, 10, 20, 0.9);
+            padding: 50px 0;
+            position: relative;
+            z-index: 2;
+        }
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .footer-section {
+            width: 30%;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 1s ease;
+        }
+        .footer-section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .footer-section h3 {
+            color: var(--gold);
+            font-size: 1.4em;
+            margin-bottom: 20px;
+        }
+        .footer-section p, .footer-section a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            line-height: 1.6;
+        }
+        .footer-section a:hover {
+            color: var(--gold);
+        }
+        .social-icons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .social-icons a {
+            color: var(--gold);
+            font-size: 1.5em;
+            transition: all 0.3s ease;
+        }
+        .social-icons a:hover {
+            transform: scale(1.2);
+        }
+        #watch-3d {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        @media (max-width: 1024px) {
+            .products {
+                flex-wrap: wrap;
+            }
+            .product {
+                width: calc(50% - 20px);
+            }
+        }
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 3em;
+            }
+            .product {
+                width: 100%;
+            }
+            .about-content {
+                flex-direction: column;
+            }
+            .about-text, .about-image {
+                width: 100%;
+                padding-right: 0;
+            }
+            .about-image {
+                margin-top: 30px;
+            }
+            .footer-content {
+                flex-direction: column;
+            }
+            .footer-section {
+                width: 100%;
+                margin-bottom: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="bg-animation"></div>
+    <div id="watch-3d"></div>
+    
+    <header>
+        <div class="container">
+            <nav>
+                <ul>
+                    <li><a href="#home">Главная</a></li>
+                    <li><a href="#products">Коллекция</a></li>
+                    <li><a href="#about">О нас</a></li>
+                    <li><a href="#contact">Контакты</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section id="home" class="hero">
+            <div class="hero-content">
+                <h1>Украсьте свое запястье роскошью</h1>
+                <p>Откройте для себя мир элегантности и точности с нашей коллекцией эксклюзивных часов</p>
+                <a href="#products" class="btn">Исследовать коллекцию</a>
+            </div>
+        </section>
+
+        <section id="products" class="featured-products">
+            <div class="container">
+                <h2>Наши лучшие модели</h2>
+                <div class="products">
+                    <div class="product">
+                        <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-e820QqFQFhXVKIJJtxYILJDaAcgEkZ.png" alt="Watch 1">
+                        <h3>Классическая элегантность</h3>
+                        <p>$1,999</p>
+                        <a href="#" class="btn">Купить сейчас</a>
+                    </div>
+                    <div class="product featured">
+                        <img src="https://cdn.leonardo.ai/users/a3fb5f9f-5b7b-421c-aa96-3d5de4d0da69/generations/3ba41b6e-daec-4843-a27c-b80f2ae24821/Leonardo_Lightning_XL_2.jpg" alt="Watch 2">
+                        <h3>Современная роскошь</h3>
+                        <p>$2,499</p>
+                        <a href="#" class="btn">Купить сейчас</a>
+                    </div>
+                    <div class="product">
+                        <img src="https://cdn.leonardo.ai/users/a3fb5f9f-5b7b-421c-aa96-3d5de4d0da69/generations/3ba41b6e-daec-4843-a27c-b80f2ae24821/Leonardo_Lightning_XL_1.jpg" alt="Watch 3">
+                        <h3>Вневременной шик</h3>
+                        <p>$1,799</p>
+                        <a href="#" class="btn">Купить сейчас</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="about-section">
+            <div class="container">
+                <div  class="about-content">
+                    <div class="about-text">
+                        <h2>Наследие роскоши</h2>
+                        <p>С момента нашего основания в 1875 году, мы стремимся создавать часы, которые не просто показывают время, но и рассказывают историю. Каждая модель - это произведение искусства, сочетающее в себе вековые традиции часового мастерства и инновационные технологии.</p>
+                        <p>Наша преданность качеству и внимание к деталям сделали нас одним из самых уважаемых имен в мире роскошных часов. Мы гордимся тем, что наши часы носят мировые лидеры, знаменитости и ценители истинной роскоши по всему миру.</p>
+                    </div>
+                    <div class="about-image">
+                        <img src="https://cdn.leonardo.ai/users/a3fb5f9f-5b7b-421c-aa96-3d5de4d0da69/generations/3ba41b6e-daec-4843-a27c-b80f2ae24821/Leonardo_Lightning_XL_0.jpg" alt="Our Heritage">
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer id="contact">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>О нас</h3>
+                    <p>Мы создаем роскошные часы, сочетающие в себе элегантность, точность и инновации. Наша миссия - украсить ваше время стилем и роскошью.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Контакты</h3>
+                    <p>n09958659@gmail.com</p>
+                    <p>Телефон:+380 0951701652</p>
+                    <p>Адрес: Украина Днепр </p>
+                </div>
+                <div class="footer-section">
+                    <h3>Следите за нами</h3>
+                    <div class="social-icons">
+                        <a href="#" aria-label="Facebook">&#xf39e;</a>
+                        <a href="#" aria-label="Instagram">&#xf16d;</a>
+                        <a href="#" aria-label="Twitter">&#xf099;</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        let scene, camera, renderer, particles, watch;
+
+        function init() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.getElementById('watch-3d').appendChild(renderer.domElement);
+
+            const geometry = new THREE.BufferGeometry();
+            const vertices = [];
+
+            for (let i = 0; i < 10000; i++) {
+                const x = (Math.random() - 0.5) * 2000;
+                const y = (Math.random() - 0.5) * 2000;
+                const z = (Math.random() - 0.5) * 2000;
+                vertices.push(x, y, z);
+            }
+
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+
+            const material = new THREE.PointsMaterial({
+                color: 0xd4af37,
+                size: 0.7,
+                transparent: true
+            });
+
+            particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+
+            // Create a simple watch model
+            const watchGeometry = new THREE.CylinderGeometry(5, 5, 1, 32);
+            const watchMaterial = new THREE.MeshPhongMaterial({ color: 0xd4af37 });
+            watch = new THREE.Mesh(watchGeometry, watchMaterial);
+            scene.add(watch);
+
+            // Add lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+
+            const pointLight = new THREE.PointLight(0xffffff, 1);
+            pointLight.position.set(10, 10, 10);
+            scene.add(pointLight);
+
+            camera.position.z = 20;
+
+            window.addEventListener('resize', onWindowResize, false);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            particles.rotation.x += 0.0003;
+            particles.rotation.y += 0.0005;
+
+            watch.rotation.y += 0.005;
+
+            renderer.render(scene, camera);
+        }
+
+        init();
+        animate();
+
+        gsap.registerPlugin(ScrollTrigger);
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const header = document.querySelector('header');
+            const heroContent = document.querySelector('.hero-content');
+            const products = document.querySelectorAll('.product');
+            const aboutText = document.querySelector('.about-text');
+            const aboutImage = document.querySelector('.about-image');
+            const footerSections = document.querySelectorAll('.footer-section');
+
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+            });
+
+            gsap.to(heroContent, {
+                scrollTrigger: {
+                    trigger: heroContent,
+                    start: "top 80%",
+                    end: "bottom 20%",
+                    toggleActions: "play none none reverse"
+                },
+                opacity: 1,
+                y: 0,
+                duration: 1,
+                ease: "power3.out"
+            });
+
+            products.forEach((product, index) => {
+                gsap.to(product, {
+                    scrollTrigger: {
+                        trigger: product,
+                        start: "top 80%",
+                        end: "bottom 20%",
+                        toggleActions: "play none none reverse"
+                    },
+                    opacity: 1,
+                    y: 0,
+                    duration: 1,
+                    delay: index * 0.2,
+                    ease: "power3.out"
+                });
+            });
+
+            gsap.to(aboutText, {
+                scrollTrigger: {
+                    trigger: aboutText,
+                    start: "top 80%",
+                    end: "bottom 20%",
+                    toggleActions: "play none none reverse"
+                },
+                opacity: 1,
+                x: 0,
+                duration: 1,
+                ease: "power3.out"
+            });
+
+            gsap.to(aboutImage, {
+                scrollTrigger: {
+                    trigger: aboutImage,
+                    start: "top 80%",
+                    end: "bottom 20%",
+                    toggleActions: "play none none reverse"
+                },
+                opacity: 1,
+                x: 0,
+                duration: 1,
+                ease: "power3.out"
+            });
+
+            footerSections.forEach((section, index) => {
+                gsap.to(section, {
+                    scrollTrigger: {
+                        trigger: section,
+                        start: "top 90%",
+                        end: "bottom 20%",
+                        toggleActions: "play none none reverse"
+                    },
+                    opacity: 1,
+                    y: 0,
+                    duration: 1,
+                    delay: index * 0.2,
+                    ease: "power3.out"
+                });
+            });
+
+            const navLinks = document.querySelectorAll('nav ul li a');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    const headerHeight = document.querySelector('header').offsetHeight;
+                    const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - headerHeight;
+                    
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
